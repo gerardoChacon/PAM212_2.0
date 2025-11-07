@@ -1,17 +1,17 @@
-import { Text, StyleSheet, View } from 'react-native';
+import { Text, StyleSheet, View, Button } from 'react-native';
 import React, { useState } from 'react';
-import { Button } from 'react-native-web'
 import ContadorScreen from './02-contadorScreen';
 import BotonesScreen from './03-botonesScreen';
 import TextImputScreen from './04-textImputScreen';
 import ImageBackgroundScreen  from './05-imageBackgroundScreen';
-import ScrollViewScreen from './06-scrollVerticalViewScreen';
+import ScrollViewScreen from './06-scrollVerticalViewScreen'; 
 import ScrollHorizontalViewScreen from './06-scrollHorizontalViewScreen';
 import ActivityIndicatorScreen from './07-activityIndicatorScreen'
 import ListsScreen from './08-listsScreen';
 import ModalScreen from './09-modalScreen';
 import BottomSheetScreen from './10-bottomSheetScreen';
 import Repaso1Screen from './11-repaso1Screen';
+import SwitchButton from './03-switch';
 
 
 
@@ -40,6 +40,8 @@ export default function MenuScreen() {
             return <Repaso1Screen/>
         case 'scrollHorizotnalView':
             return <ScrollHorizontalViewScreen/>
+        case 'switch':
+            return <SwitchButton/>
         case 'menu':
 
             default:
