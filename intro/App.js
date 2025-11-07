@@ -1,5 +1,4 @@
-import MenuScrenn from './screens/01-MenuScreen';
-// 2. Main: Zona de componentes 
+import MenuScrenn from './screens/01-menuScreen';
 export default function App() {
   return (
     <MenuScrenn></MenuScrenn>
