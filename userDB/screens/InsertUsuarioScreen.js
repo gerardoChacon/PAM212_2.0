@@ -21,6 +21,10 @@ export default function UsuarioView() {
   const [loading, setLoading] = useState(true);
   const [guardando, setGuardando] = useState(false);
 
+  // estados para editar
+  const [editando, setEditando] = useState(null); // usuario que se está editando
+  const [nuevoNombre, setNuevoNombre] = useState("");
+
   const cargarUsuarios = useCallback(async () => {
     try {
       setLoading(true);
@@ -63,6 +67,35 @@ export default function UsuarioView() {
     }
   };
 
+  const handleEliminar = async (id, nombreUsuario) => {
+    Alert.alert("Confirmar eliminación", `¿Eliminar a "${nombreUsuario}"?`, [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Eliminar",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await controller.eliminarUsuario(id);
+          } catch (error) {
+            Alert.alert("Error", error.message);
+          }
+        },
+      },
+    ]);
+  };
+
+  const handleGuardarEdicion = async () => {
+    if (!editando) return;
+
+    try {
+      await controller.actualizarUsuario(editando.id, nuevoNombre);
+      setEditando(null);
+      setNuevoNombre("");
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
+  };
+
   const renderUsuario = ({ item, index }) => (
     <View style={styles.userItem}>
       <View style={styles.userNumber}>
@@ -80,14 +113,72 @@ export default function UsuarioView() {
             day: "numeric",
           })}
         </Text>
+
+        <View style={{ flexDirection: "row", marginTop: 8 }}>
+          <TouchableOpacity
+            style={[styles.btnSmall, { backgroundColor: "#007AFF" }]}
+            onPress={() => {
+              setEditando(item);
+              setNuevoNombre(item.nombre);
+            }}
+          >
+            <Text style={styles.btnSmallText}>Editar</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.btnSmall, { backgroundColor: "red", marginLeft: 8 }]}
+            onPress={() => handleEliminar(item.id, item.nombre)}
+          >
+            <Text style={styles.btnSmallText}>Eliminar</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
 
+  const renderEditarModal = () => {
+    if (!editando) return null;
+
+    return (
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalBox}>
+          <Text style={styles.sectionTitle}>Editar Usuario</Text>
+
+          <TextInput
+            style={styles.input}
+            placeholder="Nuevo nombre"
+            value={nuevoNombre}
+            onChangeText={setNuevoNombre}
+          />
+
+          <TouchableOpacity
+            style={[styles.addButton, { marginTop: 10 }]}
+            onPress={handleGuardarEdicion}
+          >
+            <Text style={styles.addButtonText}>Guardar Cambios</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.addButton,
+              { backgroundColor: "gray", marginTop: 10 },
+            ]}
+            onPress={() => {
+              setEditando(null);
+              setNuevoNombre("");
+            }}
+          >
+            <Text style={styles.addButtonText}>Cancelar</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       {/* ======= TÍTULO PRINCIPAL ======= */}
-      <Text style={styles.mainTitle}>INSERT & SELECT</Text>
+      <Text style={styles.mainTitle}>INSERT, SELECT, UPDATE & DELETE</Text>
       <Text style={styles.subTitle}>iOS (SQLite)</Text>
 
       {/* ======= TARJETA INSERTAR USUARIO ======= */}
@@ -131,6 +222,9 @@ export default function UsuarioView() {
           style={{ marginTop: 10 }}
         />
       )}
+
+      {/* Modal de edición */}
+      {renderEditarModal()}
     </View>
   );
 }
@@ -246,5 +340,36 @@ const styles = StyleSheet.create({
     color: "#888",
     marginTop: 4,
     fontStyle: "italic",
+  },
+
+  // botones pequeños para editar / eliminar
+  btnSmall: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+  },
+
+  btnSmallText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+
+  // modal de edición
+  modalOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  modalBox: {
+    width: "80%",
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
   },
 });

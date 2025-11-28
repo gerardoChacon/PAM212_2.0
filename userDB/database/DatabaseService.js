@@ -16,12 +16,12 @@ class DatabaseService {
       this.db = await SQLite.openDatabaseAsync("miapp.db");
 
       await this.db.execAsync(`
-                CREATE TABLE IF NOT EXISTS usuarios (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    nombre TEXT NOT NULL,
-                    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
-                );
-            `);
+        CREATE TABLE IF NOT EXISTS usuarios (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          nombre TEXT NOT NULL,
+          fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
     }
   }
 
@@ -62,6 +62,40 @@ class DatabaseService {
         nombre,
         fecha_creacion: new Date().toISOString(),
       };
+    }
+  }
+
+  // Actualizar usuario por ID
+  async update(id, nombre) {
+    if (Platform.OS === "web") {
+      const usuarios = await this.getAll();
+      const index = usuarios.findIndex((u) => u.id === id);
+
+      if (index === -1) throw new Error("Usuario no encontrado");
+
+      usuarios[index].nombre = nombre;
+      localStorage.setItem(this.storageKey, JSON.stringify(usuarios));
+      return usuarios[index];
+    } else {
+      await this.db.runAsync("UPDATE usuarios SET nombre = ? WHERE id = ?", [
+        nombre,
+        id,
+      ]);
+
+      return { id, nombre };
+    }
+  }
+
+  // Eliminar usuario por ID
+  async delete(id) {
+    if (Platform.OS === "web") {
+      const usuarios = await this.getAll();
+      const filtered = usuarios.filter((u) => u.id !== id);
+      localStorage.setItem(this.storageKey, JSON.stringify(filtered));
+      return true;
+    } else {
+      await this.db.runAsync("DELETE FROM usuarios WHERE id = ?", [id]);
+      return true;
     }
   }
 }
